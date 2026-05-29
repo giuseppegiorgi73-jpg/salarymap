@@ -1,0 +1,2 @@
+# salarymap
+Benchmark stipendi Italia
