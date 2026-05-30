@@ -142,12 +142,13 @@ document.getElementById('stats').innerHTML = `
   <span class="stat-pill"><strong>${DATA.length.toLocaleString('it-IT')}</strong> Benchmark</span>
   <span class="stat-pill"><strong>${AREE.length}</strong> Macro-Aree</span>
   <span class="stat-pill"><strong>${FONTI_UNICHE.length}</strong> Fonti</span>`;
-document.getElementById('footer-date').textContent = `SalaryMap · Ultima consultazione ${todayIT} · Database v9`;
+document.getElementById('footer-date').textContent = `SalaryMap · Ultima consultazione ${todayIT}`;
 
 function resetRisultato(messaggio='Seleziona ruolo, area e fascia per visualizzare il benchmark') {
   document.getElementById('empty-state').textContent = messaggio;
   document.getElementById('empty-state').style.display = 'block';
   document.getElementById('result-card').classList.remove('visible');
+  const metaGridReset = document.getElementById('meta-grid'); if (metaGridReset) metaGridReset.style.display = 'none';
 }
 function normalizeText(value) {
   return String(value || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
@@ -228,7 +229,7 @@ function aggiornaFasceDisponibili() {
   helperRuolo.className = 'helper-text ok';
   helperRuolo.textContent = fasce.length === 1 ? '✓ Disponibile 1 livello di esperienza per questo ruolo' : `✓ Disponibili ${fasce.length} livelli di esperienza per questo ruolo`;
   coverageBox.style.display = 'block';
-  coverageBox.innerHTML = `<strong>Copertura SalaryMap</strong><br>${aree.length} aree geografiche disponibili<br>${fasce.length} ${fasce.length === 1 ? 'livello esperienza disponibile' : 'livelli esperienza disponibili'}`;
+  coverageBox.innerHTML = `<strong>Benchmark disponibile per:</strong><br>✓ ${aree.length} ${aree.length === 1 ? 'area geografica' : 'aree geografiche'}<br>✓ ${fasce.length} ${fasce.length === 1 ? 'livello di esperienza' : 'livelli di esperienza'}`;
   resetRisultato('Seleziona area geografica e fascia per visualizzare il benchmark');
 }
 inputRuolo.addEventListener('input', () => {
