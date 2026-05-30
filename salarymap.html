@@ -45,15 +45,15 @@
   .result-badge { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 20px; background: #eff6ff; color: #2563eb; margin-bottom: 8px; font-weight: 500; }
   .result-title { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
   .result-sub { font-size: 13px; color: #6b7280; line-height: 1.5; }
-  .meta-grid { display:grid; grid-template-columns: 1fr; gap:10px; margin: 14px 0 22px; }
-  .meta-box { background:#f8f9fa; border-radius:10px; padding:12px; }
+  .meta-grid { display:grid; grid-template-columns: 1fr; gap:10px; margin: 12px 0 18px; }
+  .meta-box { background:#f8f9fa; border-radius:10px; padding:10px 12px; }
   .meta-label { font-size:10px; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin-bottom:5px; }
   .meta-value { font-size:13px; color:#374151; font-weight:600; }
   .ral-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
   .ral-box { background: #f8f9fa; border-radius: 10px; padding: 16px; text-align: center; }
   .ral-label { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
   .ral-value { font-size: 20px; font-weight: 700; color: #1a1a2e; }
-  .ral-box.highlight { background: #eff6ff; } .ral-box.highlight .ral-value { color: #2563eb; }
+  .ral-box.highlight { background: #eff6ff; border: 1px solid #dbeafe; } .ral-box.highlight .ral-value { color: #2563eb; font-size: 24px; line-height: 1.15; }
   .bar-section { margin-bottom: 24px; } .bar-label { font-size: 12px; color: #6b7280; margin-bottom: 8px; }
   .bar-track { height: 8px; background: #e5e7eb; border-radius: 99px; position: relative; }
   .bar-fill { height: 8px; background: linear-gradient(to right, #bfdbfe, #2563eb); border-radius: 99px; }
@@ -109,7 +109,7 @@
   <div class="card result-card" id="result-card">
     <div class="result-header"><span class="result-badge" id="res-badge"></span><div class="result-title" id="res-title"></div><div class="result-sub" id="res-sub"></div></div>
     <div class="meta-grid" id="meta-grid">
-      <div class="meta-box"><div class="meta-label">Bonus indicativo</div><div class="meta-value" id="res-bonus"></div></div>
+      <div class="meta-box"><div class="meta-label">Bonus variabile</div><div class="meta-value" id="res-bonus"></div></div>
     </div>
     <div class="ral-grid"><div class="ral-box"><div class="ral-label">RAL minima</div><div class="ral-value" id="res-min"></div></div><div class="ral-box highlight"><div class="ral-label">RAL media</div><div class="ral-value" id="res-media"></div></div><div class="ral-box"><div class="ral-label">RAL massima</div><div class="ral-value" id="res-max"></div></div></div>
     <div class="bar-section"><div class="bar-label">Posizionamento nella forbice di mercato</div><div class="bar-track"><div class="bar-fill" id="bar-fill"></div><div class="bar-dot" id="bar-dot"></div></div><div class="bar-ticks"><span id="tick-min"></span><span id="tick-media">media</span><span id="tick-max"></span></div></div>
@@ -312,7 +312,7 @@ function calcolaBenchmark() {
     document.getElementById('res-bonus').textContent = bonusValue;
   }
   document.getElementById('res-min').textContent = fmt(match.ral_min); document.getElementById('res-media').textContent = fmt(match.ral_media); document.getElementById('res-max').textContent = fmt(match.ral_max);
-  document.getElementById('res-interpretazione').innerHTML = `Per un <strong>${ruolo}</strong> con esperienza <strong>${fascia}</strong> in area <strong>${area}</strong>, la retribuzione media di mercato è pari a circa <strong>${fmt(match.ral_media)}</strong>. La maggior parte dei professionisti si colloca tra <strong>${fmt(match.ral_min)}</strong> e <strong>${fmt(match.ral_max)}</strong>.`;
+  document.getElementById('res-interpretazione').innerHTML = `Per il ruolo <strong>${ruolo}</strong>, con esperienza <strong>${fascia}</strong> in area <strong>${area}</strong>, la retribuzione media di mercato è pari a circa <strong>${fmt(match.ral_media)}</strong>. La maggior parte dei profili si colloca tra <strong>${fmt(match.ral_min)}</strong> e <strong>${fmt(match.ral_max)}</strong>.`;
   document.getElementById('tick-min').textContent = fmt(match.ral_min); document.getElementById('tick-max').textContent = fmt(match.ral_max);
   let pct = 50;
   if (match.ral_max && match.ral_min && match.ral_max > match.ral_min) pct = ((match.ral_media - match.ral_min) / (match.ral_max - match.ral_min) * 100);
