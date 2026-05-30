@@ -26,8 +26,12 @@
 
   .form-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
   .form-group label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
-  .form-group select { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 14px; color: #1a1a2e; background: #fff; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; cursor: pointer; }
-  .form-group select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+  .form-group select,
+  .form-group input { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 14px; color: #1a1a2e; background: #fff; }
+  .form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; cursor: pointer; }
+  .form-group select:focus,
+  .form-group input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+  .helper-text { margin-top: 6px; font-size: 12px; color: #9ca3af; }
 
   .btn { width: 100%; padding: 13px; background: #2563eb; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
   .btn:hover { background: #1d4ed8; }
@@ -100,10 +104,10 @@
     <div class="card-title">Seleziona i parametri</div>
     <div class="form-grid">
       <div class="form-group">
-        <label for="sel-ruolo">Ruolo</label>
-        <select id="sel-ruolo">
-          <option value="">— Seleziona il ruolo —</option>
-        </select>
+        <label for="input-ruolo">Ruolo</label>
+        <input id="input-ruolo" type="search" list="lista-ruoli" placeholder="Cerca ruolo, es. Direttore Logistica" autocomplete="off">
+        <datalist id="lista-ruoli"></datalist>
+        <div class="helper-text">Scrivi almeno una parola e seleziona uno dei ruoli disponibili nel database.</div>
       </div>
       <div class="form-group">
         <label for="sel-area">Macro-area Geografica</label>
@@ -202,13 +206,12 @@ const RUOLI = [...new Set(DATA.map(item => item.ruolo))]
   .sort((a, b) => a.localeCompare(b, 'it'));
 
 
-// Popola dropdown ruoli
-const selRuolo = document.getElementById('sel-ruolo');
+// Popola il campo ricerca ruoli con autocomplete dai ruoli presenti nel database
+const listaRuoli = document.getElementById('lista-ruoli');
 RUOLI.forEach(r => {
   const opt = document.createElement('option');
   opt.value = r;
-  opt.textContent = r;
-  selRuolo.appendChild(opt);
+  listaRuoli.appendChild(opt);
 });
 
 function fmt(n) {
@@ -216,12 +219,17 @@ function fmt(n) {
 }
 
 function calcolaBenchmark() {
-  const ruolo = document.getElementById('sel-ruolo').value;
+  const ruolo = document.getElementById('input-ruolo').value.trim();
   const area = document.getElementById('sel-area').value;
   const fascia = document.getElementById('sel-fascia').value;
 
   if (!ruolo || !area || !fascia) {
     alert('Seleziona tutti e tre i parametri.');
+    return;
+  }
+
+  if (!RUOLI.includes(ruolo)) {
+    alert('Seleziona un ruolo valido tra quelli suggeriti dal database.');
     return;
   }
 
