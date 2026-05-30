@@ -29,6 +29,12 @@
   .form-group select,.form-group input { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 14px; color: #1a1a2e; background: #fff; }
   .form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; cursor: pointer; }
   .form-group select:focus,.form-group input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+  .autocomplete-wrap { position: relative; }
+  .suggestions-box { display: none; position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 6px); max-height: 260px; overflow-y: auto; background: #fff; border: 1px solid #d1d5db; border-radius: 12px; box-shadow: 0 12px 28px rgba(15,23,42,0.12); padding: 6px; }
+  .suggestions-box.visible { display: block; }
+  .suggestion-item { padding: 10px 12px; border-radius: 9px; font-size: 14px; cursor: pointer; color: #1a1a2e; }
+  .suggestion-item:hover, .suggestion-item.active { background: #eff6ff; color: #2563eb; }
+  .suggestion-empty { padding: 10px 12px; font-size: 13px; color: #9ca3af; }
   .helper-text { margin-top: 6px; font-size: 12px; color: #9ca3af; line-height: 1.5; }
   .helper-text.ok { color: #2563eb; }
   .coverage { display:none; background:#f8f9fa; border: 1px solid #eef0f3; border-radius: 10px; padding: 10px 12px; font-size: 12px; color:#4b5563; line-height:1.6; }
@@ -56,6 +62,8 @@
   .divider { border: none; border-top: 1px solid #f0f0f0; margin: 20px 0; }
   .section-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
   .note-box { display: flex; gap: 10px; background: #f8f9fa; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; font-size: 13px; color: #4b5563; line-height: 1.6; }
+  .interpretation-box { background: #eff6ff; border: 1px solid #dbeafe; border-radius: 12px; padding: 14px 16px; margin: 18px 0 6px; font-size: 14px; color: #1e3a8a; line-height: 1.6; }
+  .interpretation-box strong { color: #1d4ed8; }
   .note-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
   .fonti { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
   .fonte-tag { font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid #e5e7eb; color: #6b7280; background:#fff; }
@@ -86,8 +94,10 @@
     <div class="form-grid">
       <div class="form-group">
         <label for="input-ruolo">Ruolo</label>
-        <input id="input-ruolo" type="search" list="lista-ruoli" placeholder="Cerca ruolo, es. CFO, CIO, Controller" autocomplete="off">
-        <datalist id="lista-ruoli"></datalist>
+        <div class="autocomplete-wrap">
+          <input id="input-ruolo" type="search" placeholder="Cerca ruolo, es. CFO, CIO, Controller" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <div id="role-suggestions" class="suggestions-box" role="listbox"></div>
+        </div>
         <div class="helper-text" id="ruolo-helper">Scrivi almeno una parola e seleziona uno dei ruoli disponibili nel database.</div>
       </div>
       <div class="coverage" id="coverage-box"></div>
@@ -100,13 +110,12 @@
     <div class="result-header"><span class="result-badge" id="res-badge"></span><div class="result-title" id="res-title"></div><div class="result-sub" id="res-sub"></div></div>
     <div class="meta-grid">
       <div class="meta-box"><div class="meta-label">Livello ruolo</div><div class="meta-value" id="res-livello"></div></div>
-      <div class="meta-box"><div class="meta-label">Affidabilità dato</div><div class="meta-value" id="res-affidabilita"></div></div>
       <div class="meta-box"><div class="meta-label">Bonus indicativo</div><div class="meta-value" id="res-bonus"></div></div>
     </div>
     <div class="ral-grid"><div class="ral-box"><div class="ral-label">RAL minima</div><div class="ral-value" id="res-min"></div></div><div class="ral-box highlight"><div class="ral-label">RAL media</div><div class="ral-value" id="res-media"></div></div><div class="ral-box"><div class="ral-label">RAL massima</div><div class="ral-value" id="res-max"></div></div></div>
     <div class="bar-section"><div class="bar-label">Posizionamento nella forbice di mercato</div><div class="bar-track"><div class="bar-fill" id="bar-fill"></div><div class="bar-dot" id="bar-dot"></div></div><div class="bar-ticks"><span id="tick-min"></span><span id="tick-media">media</span><span id="tick-max"></span></div></div>
+    <div class="interpretation-box" id="res-interpretazione"></div>
     <hr class="divider"><div class="section-label">Note di contesto</div><div class="note-box"><span class="note-icon">ℹ️</span><span id="res-note"></span></div>
-    <hr class="divider"><div class="section-label">Metodo e tipo dato</div><div class="note-box"><span class="note-icon">📌</span><span id="res-metodo"></span></div>
     <hr class="divider"><div class="section-label">Fonti</div><div class="fonti" id="fonti-box"></div>
     <div class="result-footer"><span class="data-label" id="footer-date"></span><button class="export-btn" disabled>⬇ Esporta PDF <span class="pro-tag">PRO</span></button></div>
   </div>
@@ -121,14 +130,13 @@ const todayIT = today.toLocaleDateString('it-IT');
 const RUOLI = [...new Set(DATA.map(d => d.ruolo).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
 const AREE = [...new Set(DATA.map(d => d.area).filter(Boolean))].sort((a,b)=>AREA_ORDER.indexOf(a)-AREA_ORDER.indexOf(b));
 const FONTI_UNICHE = [...new Set(DATA.flatMap(d => [d.fonte_primaria, d.fonte_secondaria, d.fonte_territoriale, d.fonte_bonus, d.fonte].filter(Boolean).flatMap(s => String(s).split('/').map(x=>x.trim()).filter(Boolean))))];
-const listaRuoli = document.getElementById('lista-ruoli');
+const suggestionsBox = document.getElementById('role-suggestions');
 const inputRuolo = document.getElementById('input-ruolo');
 const selArea = document.getElementById('sel-area');
 const selFascia = document.getElementById('sel-fascia');
 const helperRuolo = document.getElementById('ruolo-helper');
 const coverageBox = document.getElementById('coverage-box');
 
-RUOLI.forEach(r => { const opt=document.createElement('option'); opt.value=r; listaRuoli.appendChild(opt); });
 AREE.forEach(a => { const opt=document.createElement('option'); opt.value=a; opt.textContent=a; selArea.appendChild(opt); });
 document.getElementById('stats').innerHTML = `
   <span class="stat-pill"><strong>${RUOLI.length}</strong> Ruoli</span>
@@ -142,18 +150,70 @@ function resetRisultato(messaggio='Seleziona ruolo, area e fascia per visualizza
   document.getElementById('empty-state').style.display = 'block';
   document.getElementById('result-card').classList.remove('visible');
 }
+function normalizeText(value) {
+  return String(value || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+}
 function ruoloValido() { return RUOLI.includes(inputRuolo.value.trim()); }
 function sortFasce(fasce) { return fasce.sort((a,b)=>FASCE_ORDER.indexOf(a)-FASCE_ORDER.indexOf(b)); }
+function getMatchingRoles(query) {
+  const q = normalizeText(query);
+  if (!q) return [];
+  return RUOLI
+    .map(role => ({ role, norm: normalizeText(role) }))
+    .filter(item => item.norm.startsWith(q) || item.norm.includes(q))
+    .sort((a,b) => {
+      const aStart = a.norm.startsWith(q) ? 0 : 1;
+      const bStart = b.norm.startsWith(q) ? 0 : 1;
+      return aStart - bStart || a.role.localeCompare(b.role, 'it');
+    })
+    .slice(0, 12)
+    .map(item => item.role);
+}
+function hideSuggestions() {
+  suggestionsBox.classList.remove('visible');
+  suggestionsBox.innerHTML = '';
+}
+function showSuggestions() {
+  const query = inputRuolo.value;
+  const matches = getMatchingRoles(query);
+  suggestionsBox.innerHTML = '';
+  if (!query.trim()) { hideSuggestions(); return; }
+  if (!matches.length) {
+    const empty = document.createElement('div');
+    empty.className = 'suggestion-empty';
+    empty.textContent = 'Nessun ruolo trovato nel database';
+    suggestionsBox.appendChild(empty);
+    suggestionsBox.classList.add('visible');
+    return;
+  }
+  matches.forEach(role => {
+    const item = document.createElement('div');
+    item.className = 'suggestion-item';
+    item.textContent = role;
+    item.setAttribute('role', 'option');
+    item.addEventListener('mousedown', (event) => {
+      event.preventDefault();
+      inputRuolo.value = role;
+      hideSuggestions();
+      aggiornaFasceDisponibili();
+    });
+    suggestionsBox.appendChild(item);
+  });
+  suggestionsBox.classList.add('visible');
+}
+function resetFasceForInvalidRole() {
+  selFascia.disabled = true;
+  selFascia.innerHTML = '<option value="">— Prima seleziona un ruolo valido —</option>';
+  coverageBox.style.display = 'none';
+  helperRuolo.className = 'helper-text';
+  helperRuolo.textContent = 'Scrivi e seleziona uno dei ruoli suggeriti dal database.';
+  resetRisultato();
+}
 function aggiornaFasceDisponibili() {
   const ruolo = inputRuolo.value.trim();
   selFascia.innerHTML = '';
-  coverageBox.style.display = 'none';
-  helperRuolo.className = 'helper-text';
   if (!ruolo || !RUOLI.includes(ruolo)) {
-    selFascia.disabled = true;
-    selFascia.innerHTML = '<option value="">— Prima seleziona un ruolo valido —</option>';
-    helperRuolo.textContent = 'Scrivi almeno una parola e seleziona uno dei ruoli disponibili nel database.';
-    resetRisultato();
+    resetFasceForInvalidRole();
     return;
   }
   const righeRuolo = DATA.filter(d => d.ruolo === ruolo);
@@ -172,8 +232,32 @@ function aggiornaFasceDisponibili() {
   coverageBox.innerHTML = `<strong>Copertura SalaryMap</strong><br>${aree.length} aree geografiche disponibili<br>${fasce.length} ${fasce.length === 1 ? 'livello esperienza disponibile' : 'livelli esperienza disponibili'}`;
   resetRisultato('Seleziona area geografica e fascia per visualizzare il benchmark');
 }
-inputRuolo.addEventListener('input', aggiornaFasceDisponibili);
-inputRuolo.addEventListener('change', aggiornaFasceDisponibili);
+inputRuolo.addEventListener('input', () => {
+  showSuggestions();
+  if (ruoloValido()) {
+    hideSuggestions();
+    aggiornaFasceDisponibili();
+  } else {
+    resetFasceForInvalidRole();
+  }
+});
+inputRuolo.addEventListener('focus', showSuggestions);
+inputRuolo.addEventListener('blur', () => setTimeout(hideSuggestions, 120));
+inputRuolo.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    const first = suggestionsBox.querySelector('.suggestion-item');
+    if (first && suggestionsBox.classList.contains('visible')) {
+      event.preventDefault();
+      inputRuolo.value = first.textContent;
+      hideSuggestions();
+      aggiornaFasceDisponibili();
+    }
+  }
+  if (event.key === 'Escape') hideSuggestions();
+});
+document.addEventListener('click', (event) => {
+  if (!event.target.closest('.autocomplete-wrap')) hideSuggestions();
+});
 function fmt(n) { return n == null ? 'n.d.' : '€ ' + Number(n).toLocaleString('it-IT'); }
 function bonusTxt(match) {
   const min = String(match.bonus_min || '').trim(); const max = String(match.bonus_max || '').trim();
@@ -182,10 +266,31 @@ function bonusTxt(match) {
   if (match.bonus_note && match.bonus_note !== 'Non disponibile') return match.bonus_note;
   return 'Non disponibile';
 }
+function normalizzaFonte(fonte) {
+  const raw = String(fonte || '').trim();
+  if (!raw) return '';
+  const low = raw.toLowerCase();
+  if (low.includes('michael page')) return 'Michael Page 2026';
+  if (low.includes('hays')) return 'Hays 2026';
+  if (low.includes('jobpricing') || low.includes('job pricing')) return 'JobPricing 2026';
+  if (low.includes('hunters')) return 'Hunters Group 2026';
+  if (low.includes('salarymap') || low.includes('regole')) return '';
+  return raw.replace(/salary guide/ig, '').replace(/salary outlook/ig, '').replace(/osservatorio/ig, '').replace(/italia/ig, '').replace(/\s+/g, ' ').trim();
+}
 function splitFonti(match) {
   const parts = [match.fonte_primaria, match.fonte_secondaria, match.fonte_territoriale, match.fonte_bonus, match.fonte]
-    .filter(Boolean).flatMap(s => String(s).split('/').map(x => x.trim()).filter(Boolean));
-  return [...new Set(parts)].slice(0, 8);
+    .filter(Boolean)
+    .flatMap(s => String(s).split('/').map(x => x.trim()).filter(Boolean))
+    .map(normalizzaFonte)
+    .filter(Boolean);
+  const priority = ['Michael Page 2026','Hays 2026','JobPricing 2026','Hunters Group 2026'];
+  const unique = [...new Set(parts)];
+  unique.sort((a,b) => {
+    const ia = priority.indexOf(a); const ib = priority.indexOf(b);
+    if (ia !== -1 || ib !== -1) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+    return a.localeCompare(b, 'it');
+  });
+  return unique.slice(0, 4);
 }
 function calcolaBenchmark() {
   const ruolo = inputRuolo.value.trim(); const area = selArea.value; const fascia = selFascia.value;
@@ -197,18 +302,16 @@ function calcolaBenchmark() {
   emptyState.style.display='none'; resultCard.classList.add('visible');
   document.getElementById('res-badge').textContent = `${match.famiglia || 'Benchmark'} · ${area}`;
   document.getElementById('res-title').textContent = ruolo;
-  document.getElementById('res-sub').textContent = `${match.settore || match.famiglia || 'Settore n.d.'} • ${area} • ${fascia} • Aggiornato al ${todayIT}`;
+  document.getElementById('res-sub').textContent = `${match.famiglia || 'Benchmark'} • ${area} • ${fascia}`;
   document.getElementById('res-livello').textContent = match.livello_ruolo || 'n.d.';
-  document.getElementById('res-affidabilita').textContent = match.affidabilita || 'n.d.';
   document.getElementById('res-bonus').textContent = bonusTxt(match);
   document.getElementById('res-min').textContent = fmt(match.ral_min); document.getElementById('res-media').textContent = fmt(match.ral_media); document.getElementById('res-max').textContent = fmt(match.ral_max);
+  document.getElementById('res-interpretazione').innerHTML = `Per un profilo <strong>${ruolo}</strong> con esperienza <strong>${fascia}</strong> in area <strong>${area}</strong>, la RAL media di mercato è pari a <strong>${fmt(match.ral_media)}</strong>. La maggior parte dei profili si colloca tra <strong>${fmt(match.ral_min)}</strong> e <strong>${fmt(match.ral_max)}</strong>.`;
   document.getElementById('tick-min').textContent = fmt(match.ral_min); document.getElementById('tick-max').textContent = fmt(match.ral_max);
   let pct = 50;
   if (match.ral_max && match.ral_min && match.ral_max > match.ral_min) pct = ((match.ral_media - match.ral_min) / (match.ral_max - match.ral_min) * 100);
   pct = Math.max(0, Math.min(100, pct)); document.getElementById('bar-fill').style.width = pct + '%'; document.getElementById('bar-dot').style.left = pct + '%';
   document.getElementById('res-note').textContent = match.note || 'Nessuna nota disponibile.';
-  const metodo = [match.tipo_dato, match.metodo].filter(Boolean).join(' — ');
-  document.getElementById('res-metodo').textContent = metodo || 'Metodo non disponibile.';
   const fontiBox = document.getElementById('fonti-box'); fontiBox.innerHTML='';
   splitFonti(match).forEach(f => { const span=document.createElement('span'); span.className='fonte-tag'; span.textContent=f; fontiBox.appendChild(span); });
 }
