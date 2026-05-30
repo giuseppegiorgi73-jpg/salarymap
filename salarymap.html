@@ -45,7 +45,7 @@
   .result-badge { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 20px; background: #eff6ff; color: #2563eb; margin-bottom: 8px; font-weight: 500; }
   .result-title { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
   .result-sub { font-size: 13px; color: #6b7280; line-height: 1.5; }
-  .meta-grid { display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin: 14px 0 22px; }
+  .meta-grid { display:grid; grid-template-columns: 1fr; gap:10px; margin: 14px 0 22px; }
   .meta-box { background:#f8f9fa; border-radius:10px; padding:12px; }
   .meta-label { font-size:10px; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin-bottom:5px; }
   .meta-value { font-size:13px; color:#374151; font-weight:600; }
@@ -108,8 +108,7 @@
   </div>
   <div class="card result-card" id="result-card">
     <div class="result-header"><span class="result-badge" id="res-badge"></span><div class="result-title" id="res-title"></div><div class="result-sub" id="res-sub"></div></div>
-    <div class="meta-grid">
-      <div class="meta-box"><div class="meta-label">Livello ruolo</div><div class="meta-value" id="res-livello"></div></div>
+    <div class="meta-grid" id="meta-grid">
       <div class="meta-box"><div class="meta-label">Bonus indicativo</div><div class="meta-value" id="res-bonus"></div></div>
     </div>
     <div class="ral-grid"><div class="ral-box"><div class="ral-label">RAL minima</div><div class="ral-value" id="res-min"></div></div><div class="ral-box highlight"><div class="ral-label">RAL media</div><div class="ral-value" id="res-media"></div></div><div class="ral-box"><div class="ral-label">RAL massima</div><div class="ral-value" id="res-max"></div></div></div>
@@ -129,7 +128,7 @@ const today = new Date();
 const todayIT = today.toLocaleDateString('it-IT');
 const RUOLI = [...new Set(DATA.map(d => d.ruolo).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
 const AREE = [...new Set(DATA.map(d => d.area).filter(Boolean))].sort((a,b)=>AREA_ORDER.indexOf(a)-AREA_ORDER.indexOf(b));
-const FONTI_UNICHE = [...new Set(DATA.flatMap(d => [d.fonte_primaria, d.fonte_secondaria, d.fonte_territoriale, d.fonte_bonus, d.fonte].filter(Boolean).flatMap(s => String(s).split('/').map(x=>x.trim()).filter(Boolean))))];
+const FONTI_UNICHE = ['Michael Page 2026','Hays 2026','JobPricing 2026','Hunters Group 2026'].filter(f => DATA.some(d => [d.fonte_primaria, d.fonte_secondaria, d.fonte_territoriale, d.fonte_bonus, d.fonte].filter(Boolean).join(' / ').toLowerCase().includes(f.split(' ')[0].toLowerCase())));
 const suggestionsBox = document.getElementById('role-suggestions');
 const inputRuolo = document.getElementById('input-ruolo');
 const selArea = document.getElementById('sel-area');
@@ -290,7 +289,8 @@ function splitFonti(match) {
     if (ia !== -1 || ib !== -1) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
     return a.localeCompare(b, 'it');
   });
-  return unique.slice(0, 4);
+  const principali = unique.filter(f => priority.includes(f));
+  return (principali.length ? principali : unique).slice(0, 3);
 }
 function calcolaBenchmark() {
   const ruolo = inputRuolo.value.trim(); const area = selArea.value; const fascia = selFascia.value;
@@ -303,10 +303,16 @@ function calcolaBenchmark() {
   document.getElementById('res-badge').textContent = `${match.famiglia || 'Benchmark'} · ${area}`;
   document.getElementById('res-title').textContent = ruolo;
   document.getElementById('res-sub').textContent = `${match.famiglia || 'Benchmark'} • ${area} • ${fascia}`;
-  document.getElementById('res-livello').textContent = match.livello_ruolo || 'n.d.';
-  document.getElementById('res-bonus').textContent = bonusTxt(match);
+  const bonusValue = bonusTxt(match);
+  const metaGrid = document.getElementById('meta-grid');
+  if (bonusValue === 'Non disponibile') {
+    metaGrid.style.display = 'none';
+  } else {
+    metaGrid.style.display = 'grid';
+    document.getElementById('res-bonus').textContent = bonusValue;
+  }
   document.getElementById('res-min').textContent = fmt(match.ral_min); document.getElementById('res-media').textContent = fmt(match.ral_media); document.getElementById('res-max').textContent = fmt(match.ral_max);
-  document.getElementById('res-interpretazione').innerHTML = `Per un profilo <strong>${ruolo}</strong> con esperienza <strong>${fascia}</strong> in area <strong>${area}</strong>, la RAL media di mercato è pari a <strong>${fmt(match.ral_media)}</strong>. La maggior parte dei profili si colloca tra <strong>${fmt(match.ral_min)}</strong> e <strong>${fmt(match.ral_max)}</strong>.`;
+  document.getElementById('res-interpretazione').innerHTML = `Per un <strong>${ruolo}</strong> con esperienza <strong>${fascia}</strong> in area <strong>${area}</strong>, la retribuzione media di mercato è pari a circa <strong>${fmt(match.ral_media)}</strong>. La maggior parte dei professionisti si colloca tra <strong>${fmt(match.ral_min)}</strong> e <strong>${fmt(match.ral_max)}</strong>.`;
   document.getElementById('tick-min').textContent = fmt(match.ral_min); document.getElementById('tick-max').textContent = fmt(match.ral_max);
   let pct = 50;
   if (match.ral_max && match.ral_min && match.ral_max > match.ral_min) pct = ((match.ral_media - match.ral_min) / (match.ral_max - match.ral_min) * 100);
